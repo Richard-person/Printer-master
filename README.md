@@ -1,7 +1,7 @@
-# Printer-master
+#   Printer-master
 这是一个支持USB端口、网络端口、蓝牙端口的小票打印库，提供较全的打印指令，便捷添加格式自适应打印内容
 
-##源码示例
+##  源码示例
 ```java
     public class MainActivity extends AppCompatActivity {
 
