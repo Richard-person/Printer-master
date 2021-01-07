@@ -2,6 +2,7 @@
 这是一个支持USB端口、网络端口、蓝牙端口的小票打印库，提供较全的打印指令，便捷添加格式自适应打印内容
 
 ##源码示例
+```java
     public class MainActivity extends AppCompatActivity {
 
         private View btn_test_print;
@@ -18,20 +19,6 @@
                 @Override
                 public void onClick(View v) {
                     startPrint(generatorPrintData());
-
-    //                UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-    //                HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
-    //                Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-    //                while (deviceIterator.hasNext()){
-    //                    UsbDevice usbDevice = deviceIterator.next();
-    //
-    //                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-    //                        Log.d("testtt",String.format("%s[%s]",usbDevice.getManufacturerName(),usbDevice.getDeviceName()));
-    //                    } else {
-    //                        Log.d("testtt",String.format("%s[%s]",usbDevice.getDeviceName(),usbDevice.getDeviceName()));
-    //                    }
-    //
-    //                }
                 }
             });
         }
@@ -47,12 +34,12 @@
          */
         private PrintParams generatorPrintData() {
             PrintParams printParams = new PrintParams(TicketSpec.SPEC_58);
-    //        printParams.add("消费小票", 1, false, Align.CENTER);
-    //        printParams.addNextRow();
-    //        printParams.addRow(0, String.format("单号:%s", "AD123213212321231231223434343432"));
-    //        printParams.addSplitLine(0, true);
-    //
-    //        //第一种
+            printParams.add("消费小票", 1, false, Align.CENTER);
+            printParams.addNextRow();
+            printParams.addRow(0, String.format("单号:%s", "AD123213212321231231223434343432"));
+            printParams.addSplitLine(0, true);
+
+            //第一种
     //        float[] widthWeigh = new float[]{2.4F, 1, 1, 1};
     //        printParams.addRow(0, false, widthWeigh, "名称", "数量", "单价", "小计");
     //        printParams.addRow(0, widthWeigh, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭", "1", "0.99", "0.99");
@@ -64,10 +51,6 @@
 
             //第二种
             int fontSize = 0;
-            printParams.add("消费小票", 1, true, Align.CENTER);
-            printParams.addNextRow();
-            printParams.addRow(fontSize, new ColumnItem(String.format("单号:%s", "AD1232132123212312312234343")));
-            printParams.addSplitLine(0, true);
 
             printParams.addRow(
                     fontSize
@@ -117,8 +100,9 @@
                 public void run() {
                     try {
                         //连接打印机并打印
-    //                    POSPrinter printer = PrinterManager.get().connectNetPort("172.16.2.249", 9100);
-                        POSPrinter printer = PrinterManager.get().connectUSBPort(getApplicationContext(), "/dev/bus/usb/001/004");
+    //                    POSPrinter printer = PrinterManager.get().connectBTPort("")//蓝牙端口打印机
+    //                    POSPrinter printer = PrinterManager.get().connectNetPort("172.16.2.249", 9100);//网口打印机
+                        POSPrinter printer = PrinterManager.get().connectUSBPort(getApplicationContext(), "/dev/bus/usb/001/004");//USB端口打印机
 
                         //重置复位打印机
                         printDataList.add(0, PrinterCmdUtil.resetPrinter());
@@ -141,7 +125,7 @@
                         //写入打印内容数据
                         printer.write(printDataList);
 
-                        //端口连接
+                        //断开连接
                         printer.disconnect();
                     } catch (Throwable e) {
                         e.printStackTrace();
@@ -151,3 +135,4 @@
         }
 
     }
+    ```
