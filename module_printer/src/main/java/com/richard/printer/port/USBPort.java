@@ -30,6 +30,7 @@ import java.util.List;
 public class USBPort extends PrinterPort {
 
     private final String ACTION_USB_PERMISSION = "com.richard.printer.port.USB_PERMISSION";
+    private int PRINTER_TIMEOUT = 3000;//打印超时时间（毫秒）
 
     private UsbManager mUsbManager = null;
     private UsbDevice mUsbDevice = null;
@@ -220,9 +221,8 @@ public class USBPort extends PrinterPort {
             temData[i - offset] = data[i];
         }
 
-        byte requestTime = 0;
         try {
-            int writeCount = this.mUsbDeviceConnection.bulkTransfer(this.mUsbOutEndpoint, temData, temData.length, requestTime);
+            int writeCount = this.mUsbDeviceConnection.bulkTransfer(this.mUsbOutEndpoint, temData, temData.length, PRINTER_TIMEOUT);
             return writeCount < 0
                     ? new ReturnMessage(ErrorCode.WriteDataFailed, "usb port write bulkTransfer failed !\n")
                     : new ReturnMessage(ErrorCode.WriteDataSuccess, "send " + writeCount + " bytes.\n", writeCount);
@@ -239,7 +239,7 @@ public class USBPort extends PrinterPort {
         }
 
         byte[] temBuffer = new byte[count];
-        int readBytes = this.mUsbDeviceConnection.bulkTransfer(this.mUsbInEndpoint, buffer, count, 3000);
+        int readBytes = this.mUsbDeviceConnection.bulkTransfer(this.mUsbInEndpoint, buffer, count, PRINTER_TIMEOUT);
 
         if (readBytes < 0) {
             return new ReturnMessage(ErrorCode.ReadDataFailed, "usb port read bulkTransfer failed !\n");
