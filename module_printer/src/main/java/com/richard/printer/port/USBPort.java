@@ -18,7 +18,6 @@ import com.richard.printer.model.PortInfo;
 import com.richard.printer.model.ReturnMessage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -28,7 +27,9 @@ import java.util.List;
  * version V1.0
  * description: USB 端口连接相关实现
  */
-public class USBPort extends PrinterPort{
+public class USBPort extends PrinterPort {
+
+    private final String ACTION_USB_PERMISSION = "com.richard.printer.port.USB_PERMISSION";
 
     private UsbManager mUsbManager = null;
     private UsbDevice mUsbDevice = null;
@@ -36,72 +37,75 @@ public class USBPort extends PrinterPort{
     private UsbDeviceConnection mUsbDeviceConnection = null;
     private UsbEndpoint mUsbInEndpoint = null;
     private UsbEndpoint mUsbOutEndpoint = null;
-    private PendingIntent mPermissionIntent = null;
     private String mUserUsbName = null;
-    private final String ACTION_USB_PERMISSION = "com.richard.printer.port.USB_PERMISSION";
-    private int usbData;
 
+    /**
+     * usb授权结果接收广播
+     */
     private final BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (ACTION_USB_PERMISSION.equals(action)) {
-                synchronized (this) {
-                    UsbDevice device = intent.getParcelableExtra("device");
-                    if (intent.getBooleanExtra("permission", false) && device != null) {
-                        mUsbDevice = device;
-                    }
+            if (!ACTION_USB_PERMISSION.equals(intent.getAction())) {
+                return;
+            }
+            synchronized (this) {
+                UsbDevice device = intent.getParcelableExtra("device");
+                if (intent.getBooleanExtra("permission", false) && device != null) {
+                    mUsbDevice = device;
                 }
             }
-
         }
     };
 
     public USBPort(PortInfo portInfo) {
         super(portInfo);
-        if (portInfo.getPortType() != PortType.USB && portInfo.getContext() != null && portInfo.getUsbPathName().equals("")) {
+
+        //获取USBManager
+        this.mUsbManager = (UsbManager) this.mPortInfo.getContext().getSystemService(Context.USB_SERVICE);
+
+        if (portInfo.getPortType() != PortType.USB
+                && portInfo.getContext() != null
+                && "".equals(portInfo.getUsbPathName())) {
             this.mPortInfo.setParIsOK(false);
         } else {
             this.mPortInfo.setParIsOK(true);
-            if (this.mPortInfo.getUsbPathName() != null && !portInfo.getUsbPathName().equals("")) {
+            if (this.mPortInfo.getUsbPathName() != null && !"".equals(portInfo.getUsbPathName())) {
                 this.mUserUsbName = this.mPortInfo.getUsbPathName();
             }
         }
-
-    }
-
-    private int setUsbData(int d1) {
-        return this.usbData = d1;
-    }
-
-    public int getUsbData() {
-        return this.usbData;
     }
 
     /**
      * 获取USB设备列表
      */
-    private List<UsbDevice> getUsbDeviceList() {
-        List<UsbDevice> temList = new ArrayList<>();
-        this.mUsbManager = (UsbManager) this.mPortInfo.getContext().getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> deviceList = this.mUsbManager.getDeviceList();
-        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-
-        while (deviceIterator.hasNext()) {
-            UsbDevice device = deviceIterator.next();
-            for (int iInterface = 0; iInterface < device.getInterfaceCount(); ++iInterface) {
-                if (device.getInterface(iInterface).getInterfaceClass() == 7
-                        && device.getInterface(iInterface).getInterfaceSubclass() == 1) {
-                    temList.add(device);
-                    break;
+    private List<UsbDevice> getUSBDeviceList() {
+        List<UsbDevice> result = new ArrayList<>();
+        for (UsbDevice device : this.mUsbManager.getDeviceList().values()) {
+            for (int index = 0; index < device.getInterfaceCount(); ++index) {
+                if (device.getInterface(index).getInterfaceClass() != 7
+                        || device.getInterface(index).getInterfaceSubclass() != 1) {
+                    continue;
                 }
+                result.add(device);
+                break;
             }
         }
 
-        if (temList.size() == 0) {
-            return null;
-        }
+        return result;
+    }
 
-        return temList;
+    /**
+     * 请求USB设备权限
+     */
+    private void requestUSBPermission(UsbDevice usbDevice) {
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this.mPortInfo.getContext(),
+                0, new Intent(this.ACTION_USB_PERMISSION), 0);
+        IntentFilter intentFilter = new IntentFilter(this.ACTION_USB_PERMISSION);
+        intentFilter.addAction("android.hardware.usb.action.USB_DEVICE_ATTACHED");
+        intentFilter.addAction("android.hardware.usb.action.USB_DEVICE_DETACHED");
+        intentFilter.addAction("android.hardware.usb.action.USB_ACCESSORY_ATTACHED");
+        intentFilter.addAction("android.hardware.usb.action.USB_ACCESSORY_DETACHED");
+        this.mPortInfo.getContext().registerReceiver(this.mUsbReceiver, intentFilter);
+        this.mUsbManager.requestPermission(usbDevice, permissionIntent);
     }
 
     @Override
@@ -110,9 +114,9 @@ public class USBPort extends PrinterPort{
             return new ReturnMessage(ErrorCode.OpenPortFailed, "PortInfo error !\n");
         }
 
-        List<UsbDevice> temDevList = this.getUsbDeviceList();
-        if (temDevList == null) {
-            return new ReturnMessage(ErrorCode.OpenPortFailed, "Not find XPrinter's USB printer !\n");
+        List<UsbDevice> temDevList = this.getUSBDeviceList();
+        if (temDevList == null || temDevList.size() <= 0) {
+            return new ReturnMessage(ErrorCode.OpenPortFailed, "Not find Printer's USB printer !\n");
         }
 
         this.mUsbDevice = null;
@@ -120,40 +124,24 @@ public class USBPort extends PrinterPort{
             if (this.mUsbManager.hasPermission(temDevList.get(0))) {
                 this.mUsbDevice = temDevList.get(0);
             } else {
-                this.mPermissionIntent = PendingIntent.getBroadcast(this.mPortInfo.getContext(), 0, new Intent(this.ACTION_USB_PERMISSION), 0);
-                IntentFilter filter = new IntentFilter(this.ACTION_USB_PERMISSION);
-                filter.addAction("android.hardware.usb.action.USB_DEVICE_ATTACHED");
-                filter.addAction("android.hardware.usb.action.USB_DEVICE_DETACHED");
-                filter.addAction("android.hardware.usb.action.USB_ACCESSORY_ATTACHED");
-                filter.addAction("android.hardware.usb.action.USB_ACCESSORY_DETACHED");
-                this.mPortInfo.getContext().registerReceiver(this.mUsbReceiver, filter);
-                this.mUsbManager.requestPermission((UsbDevice) temDevList.get(0), this.mPermissionIntent);
+                this.requestUSBPermission((UsbDevice) temDevList.get(0));
             }
         } else {
-            boolean isEq = false;
-            Iterator<UsbDevice> usbDeviceIterator = temDevList.iterator();
-            while (usbDeviceIterator.hasNext()) {
-                UsbDevice dev = usbDeviceIterator.next();
-                if (dev.getDeviceName().equals(this.mUserUsbName)) {
-                    if (this.mUsbManager.hasPermission(dev)) {
-                        this.mUsbDevice = dev;
+            boolean isFind = false;
+            for (UsbDevice item : temDevList) {
+                if (item.getDeviceName().equals(this.mUserUsbName)) {
+                    if (this.mUsbManager.hasPermission(item)) {
+                        this.mUsbDevice = item;
                     } else {
-                        this.mPermissionIntent = PendingIntent.getBroadcast(this.mPortInfo.getContext(), 0, new Intent(this.ACTION_USB_PERMISSION), 0);
-                        IntentFilter filterx = new IntentFilter(this.ACTION_USB_PERMISSION);
-                        filterx.addAction("android.hardware.usb.action.USB_DEVICE_ATTACHED");
-                        filterx.addAction("android.hardware.usb.action.USB_DEVICE_DETACHED");
-                        filterx.addAction("android.hardware.usb.action.USB_ACCESSORY_ATTACHED");
-                        filterx.addAction("android.hardware.usb.action.USB_ACCESSORY_DETACHED");
-                        this.mPortInfo.getContext().registerReceiver(this.mUsbReceiver, filterx);
-                        this.mUsbManager.requestPermission(dev, this.mPermissionIntent);
+                        this.requestUSBPermission(item);
                     }
 
-                    isEq = true;
+                    isFind = true;
                     break;
                 }
             }
 
-            if (!isEq) {
+            if (!isFind) {
                 return new ReturnMessage(ErrorCode.OpenPortFailed, "Not find " + this.mUserUsbName + " !\n");
             }
         }
@@ -163,16 +151,17 @@ public class USBPort extends PrinterPort{
         }
 
         for (int iInterface = 0; iInterface < this.mUsbDevice.getInterfaceCount(); ++iInterface) {
-            if (this.mUsbDevice.getInterface(iInterface).getInterfaceClass() != 7) {
+            UsbInterface usbInterface = this.mUsbDevice.getInterface(iInterface);
+            if (usbInterface.getInterfaceClass() != 7) {
                 continue;
             }
 
-            for (int iEndpoint = 0; iEndpoint < this.mUsbDevice.getInterface(iInterface).getEndpointCount(); ++iEndpoint) {
-                if (this.mUsbDevice.getInterface(iInterface).getEndpoint(iEndpoint).getType() == 2) {
-                    if (this.mUsbDevice.getInterface(iInterface).getEndpoint(iEndpoint).getDirection() == 128) {
-                        this.mUsbInEndpoint = this.mUsbDevice.getInterface(iInterface).getEndpoint(iEndpoint);
+            for (int iEndpoint = 0; iEndpoint < usbInterface.getEndpointCount(); ++iEndpoint) {
+                if (usbInterface.getEndpoint(iEndpoint).getType() == 2) {
+                    if (usbInterface.getEndpoint(iEndpoint).getDirection() == 128) {
+                        this.mUsbInEndpoint = usbInterface.getEndpoint(iEndpoint);
                     } else {
-                        this.mUsbOutEndpoint = this.mUsbDevice.getInterface(iInterface).getEndpoint(iEndpoint);
+                        this.mUsbOutEndpoint = usbInterface.getEndpoint(iEndpoint);
                     }
                 }
 
@@ -181,7 +170,7 @@ public class USBPort extends PrinterPort{
                 }
             }
 
-            this.mUsbInterface = this.mUsbDevice.getInterface(iInterface);
+            this.mUsbInterface = usbInterface;
             break;
         }
 
@@ -211,8 +200,7 @@ public class USBPort extends PrinterPort{
 
     @Override
     public ReturnMessage write(int data) {
-        byte[] tem = new byte[]{(byte) (data & 255)};
-        return this.write(tem);
+        return this.write(new byte[]{(byte) (data & 255)});
     }
 
     @Override
@@ -224,26 +212,23 @@ public class USBPort extends PrinterPort{
     public ReturnMessage write(byte[] data, int offset, int count) {
         if (!this.mIsOpen) {
             return new ReturnMessage(ErrorCode.WriteDataFailed, "USB port was closed !\n");
-        } else {
-            byte[] temData = new byte[count];
+        }
 
-            for (int i = offset; i < offset + count; ++i) {
-                temData[i - offset] = data[i];
-            }
+        byte[] temData = new byte[count];
 
-            byte requestTime = 0;
+        for (int i = offset; i < offset + count; ++i) {
+            temData[i - offset] = data[i];
+        }
 
-            try {
-                int writeCount = this.mUsbDeviceConnection.bulkTransfer(this.mUsbOutEndpoint, temData, temData.length, requestTime);
-                Log.i("USBwrite", String.valueOf(writeCount));
-                this.setUsbData(writeCount);
-                return writeCount < 0
-                        ? new ReturnMessage(ErrorCode.WriteDataFailed, "usb port write bulkTransfer failed !\n")
-                        : new ReturnMessage(ErrorCode.WriteDataSuccess, "send " + writeCount + " bytes.\n", writeCount);
-            } catch (NullPointerException var7) {
-                var7.printStackTrace();
-                return new ReturnMessage(ErrorCode.WriteDataFailed, "usb port write bulkTransfer failed !\n");
-            }
+        byte requestTime = 0;
+        try {
+            int writeCount = this.mUsbDeviceConnection.bulkTransfer(this.mUsbOutEndpoint, temData, temData.length, requestTime);
+            return writeCount < 0
+                    ? new ReturnMessage(ErrorCode.WriteDataFailed, "usb port write bulkTransfer failed !\n")
+                    : new ReturnMessage(ErrorCode.WriteDataSuccess, "send " + writeCount + " bytes.\n", writeCount);
+        } catch (NullPointerException var7) {
+            var7.printStackTrace();
+            return new ReturnMessage(ErrorCode.WriteDataFailed, "usb port write bulkTransfer failed !\n");
         }
     }
 
@@ -255,14 +240,16 @@ public class USBPort extends PrinterPort{
 
         byte[] temBuffer = new byte[count];
         int readBytes = this.mUsbDeviceConnection.bulkTransfer(this.mUsbInEndpoint, buffer, count, 3000);
+
         if (readBytes < 0) {
             return new ReturnMessage(ErrorCode.ReadDataFailed, "usb port read bulkTransfer failed !\n");
-        } else {
-            for (int i = offset; i < offset + readBytes; ++i) {
-                buffer[i] = temBuffer[i - offset];
-            }
-            return new ReturnMessage(ErrorCode.ReadDataSuccess, "Read " + readBytes + " bytes.\n", readBytes);
         }
+
+        for (int i = offset; i < offset + readBytes; ++i) {
+            buffer[i] = temBuffer[i - offset];
+        }
+
+        return new ReturnMessage(ErrorCode.ReadDataSuccess, "Read " + readBytes + " bytes.\n", readBytes);
     }
 
     @Override
@@ -278,48 +265,36 @@ public class USBPort extends PrinterPort{
 
     @Override
     public boolean portIsOpen() {
-        if (this.mUsbDevice != null && this.mUsbInEndpoint != null && this.mUsbOutEndpoint != null) {
-            List<String> temStr = getUsbPathNames(this.mPortInfo.getContext());
-            if (temStr != null && temStr.size() > 0) {
-                Iterator<String> var3 = temStr.iterator();
-                while (var3.hasNext()) {
-                    String str = var3.next();
-                    if (str.equals(this.mUsbDevice.getDeviceName())) {
-                        return this.mIsOpen = true;
-                    }
-                }
-                return this.mIsOpen = false;
-            } else {
-                return this.mIsOpen = false;
-            }
-        } else {
+        if (this.mUsbDevice == null || this.mUsbInEndpoint == null || this.mUsbOutEndpoint == null) {
             return this.mIsOpen = false;
         }
+
+        List<String> temStr = this.getUsbPathNames();
+        if (temStr == null || temStr.size() <= 0) {
+            return this.mIsOpen = false;
+        }
+
+        Iterator<String> var3 = temStr.iterator();
+        while (var3.hasNext()) {
+            if (var3.next().equals(this.mUsbDevice.getDeviceName())) {
+                return this.mIsOpen = true;
+            }
+        }
+        return this.mIsOpen = false;
     }
 
 
     /**
      * 获取USB路径名称列表
      */
-    public static List<String> getUsbPathNames(Context context) {
-        List<String> usbNames = new ArrayList<>();
-        UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> usbList = usbManager.getDeviceList();
+    public List<String> getUsbPathNames() {
+        List<String> result = new ArrayList<>();
+        List<UsbDevice> usbDeviceList = this.getUSBDeviceList();
 
-        for (UsbDevice device : usbList.values()) {
-            for (int iInterface = 0; iInterface < device.getInterfaceCount(); ++iInterface) {
-                if (device.getInterface(iInterface).getInterfaceClass() == 7
-                        && device.getInterface(iInterface).getInterfaceSubclass() == 1) {
-                    usbNames.add(device.getDeviceName());
-                    break;
-                }
-            }
+        for (UsbDevice device : usbDeviceList) {
+            result.add(device.getDeviceName());
         }
 
-        if (usbNames.size() == 0) {
-            usbNames = null;
-        }
-
-        return usbNames;
+        return result;
     }
 }

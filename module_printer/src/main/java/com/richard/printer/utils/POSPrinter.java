@@ -53,7 +53,7 @@ public class POSPrinter {
      */
     public POSPrinter(PortType portType, String bluetoothID) {
         this.mPortInfo.setPortType(portType);
-        this.mPortInfo.setBluetoothID(bluetoothID);
+        this.mPortInfo.setBluetoothId(bluetoothID);
     }
 
     /**
@@ -78,7 +78,7 @@ public class POSPrinter {
                 this.connectUSB(this.mPortInfo.getContext(), this.mPortInfo.getUsbPathName());
                 break;
             case Bluetooth:
-                this.connectBluetooth(this.mPortInfo.getBluetoothID());
+                this.connectBluetooth(this.mPortInfo.getBluetoothId());
                 break;
             case Ethernet:
                 this.connectNet(this.mPortInfo.getEthernetIP(), this.mPortInfo.getEthernetPort());
@@ -147,7 +147,7 @@ public class POSPrinter {
             throw new PrinterException("蓝牙ID错误");
         }
 
-        this.mPortInfo.setBluetoothID(bluetoothID);
+        this.mPortInfo.setBluetoothId(bluetoothID);
         this.mPortInfo.setPortType(PortType.Bluetooth);
         this.mPort = new BluetoothPort(this.mPortInfo);
 
@@ -222,7 +222,7 @@ public class POSPrinter {
             case Ethernet:
                 return String.format("%s:%s", mPortInfo.getEthernetIP(), mPortInfo.getEthernetPort());
             case Bluetooth:
-                return mPortInfo.getBluetoothID();
+                return mPortInfo.getBluetoothId();
             case Unknown:
             default:
                 return "";

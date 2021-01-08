@@ -32,7 +32,7 @@ public class BluetoothPort extends PrinterPort {
     public BluetoothPort(PortInfo portInfo) {
         super(portInfo);
         if (portInfo.getPortType() == PortType.Bluetooth
-                && BluetoothAdapter.checkBluetoothAddress(portInfo.getBluetoothID())) {
+                && BluetoothAdapter.checkBluetoothAddress(portInfo.getBluetoothId())) {
             this.mPortInfo.setParIsOK(true);
             this.mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         } else {
@@ -57,7 +57,7 @@ public class BluetoothPort extends PrinterPort {
             }
 
             this.mBtAdapter.cancelDiscovery();
-            this.mBtDevice = this.mBtAdapter.getRemoteDevice(this.mPortInfo.getBluetoothID());
+            this.mBtDevice = this.mBtAdapter.getRemoteDevice(this.mPortInfo.getBluetoothId());
             this.mBtSocket = this.mBtDevice.createRfcommSocketToServiceRecord(this.SPP_UUID);
             this.mBtSocket.connect();
             this.mOutPut = null;

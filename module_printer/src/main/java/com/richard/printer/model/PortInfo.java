@@ -14,107 +14,146 @@ import java.io.Serializable;
  */
 public class PortInfo implements Serializable {
 
-    private PortType mPortType;
-    private String mUsbPathName;
-    private int mUsbPid;
-    private int mUsbVid;
-    private int mEthernetPort;
-    private String mEthernetIP;
-    private String mBluetoothID;
-    private boolean mParIsOK;
-    private Context mContext;
-    private boolean mIsOpened;
+    /**
+     * 端口类型
+     */
+    private PortType portType;
+
+    /**
+     * usb名称
+     */
+    private String usbPathName;
+
+    /**
+     * usb 产品ID
+     */
+    private int usbProductId;
+
+    /**
+     * usb供应商ID
+     */
+    private int usbVendorId;
+
+    /**
+     * 网络端口
+     */
+    private int ethernetPort;
+
+    /**
+     * 网络IP地址
+     */
+    private String ethernetIP;
+
+    /**
+     * 蓝牙ID
+     */
+    private String bluetoothId;
+
+    /**
+     * 是否已准备
+     */
+    private boolean parIsOK;
+
+    /**
+     * context
+     */
+    private Context context;
+
+    /**
+     * 是否已打开端口连接
+     */
+    private boolean isOpened;
 
     public PortInfo() {
-        this.mPortType = PortType.Unknown;
-        this.mUsbPathName = "";
-        this.mUsbPid = 0;
-        this.mUsbVid = 0;
-        this.mEthernetPort = 0;
-        this.mEthernetIP = "";
-        this.mBluetoothID = "";
-        this.mParIsOK = false;
-        this.mContext = null;
-        this.mIsOpened = false;
+        this.portType = PortType.Unknown;
+        this.usbPathName = "";
+        this.usbProductId = 0;
+        this.usbVendorId = 0;
+        this.ethernetPort = 0;
+        this.ethernetIP = "";
+        this.bluetoothId = "";
+        this.parIsOK = false;
+        this.context = null;
+        this.isOpened = false;
     }
 
     public Context getContext() {
-        return mContext;
+        return context;
     }
 
     public void setContext(Context context) {
-        mContext = context;
+        this.context = context;
     }
 
     public PortType getPortType() {
-        return this.mPortType;
+        return portType;
     }
 
     public void setPortType(PortType portType) {
-        mPortType = portType;
+        this.portType = portType;
     }
 
     public String getUsbPathName() {
-        return mUsbPathName;
+        return usbPathName;
     }
 
     public void setUsbPathName(String usbPathName) {
-        mUsbPathName = usbPathName;
+        this.usbPathName = usbPathName;
     }
 
-    public int getUsbPid() {
-        return mUsbPid;
+    public int getUsbProductId() {
+        return usbProductId;
     }
 
-    public void setUsbPid(int usbPid) {
-        mUsbPid = usbPid;
+    public void setUsbProductId(int usbProductId) {
+        this.usbProductId = usbProductId;
     }
 
-    public int getUsbVid() {
-        return mUsbVid;
+    public int getUsbVendorId() {
+        return usbVendorId;
     }
 
-    public void setUsbVid(int usbVid) {
-        mUsbVid = usbVid;
+    public void setUsbVendorId(int usbVendorId) {
+        this.usbVendorId = usbVendorId;
     }
 
     public int getEthernetPort() {
-        return mEthernetPort;
+        return ethernetPort;
     }
 
     public void setEthernetPort(int ethernetPort) {
-        mEthernetPort = ethernetPort;
+        this.ethernetPort = ethernetPort;
     }
 
     public String getEthernetIP() {
-        return mEthernetIP;
+        return ethernetIP;
     }
 
     public void setEthernetIP(String ethernetIP) {
-        mEthernetIP = ethernetIP;
+        this.ethernetIP = ethernetIP;
     }
 
-    public String getBluetoothID() {
-        return mBluetoothID;
+    public String getBluetoothId() {
+        return bluetoothId;
     }
 
-    public void setBluetoothID(String bluetoothID) {
-        mBluetoothID = bluetoothID;
+    public void setBluetoothId(String bluetoothId) {
+        this.bluetoothId = bluetoothId;
     }
 
     public boolean isParIsOK() {
-        return mParIsOK;
+        return parIsOK;
     }
 
     public void setParIsOK(boolean parIsOK) {
-        mParIsOK = parIsOK;
+        this.parIsOK = parIsOK;
     }
 
     public boolean isOpened() {
-        return mIsOpened;
+        return isOpened;
     }
 
     public void setOpened(boolean opened) {
-        mIsOpened = opened;
+        isOpened = opened;
     }
 }
