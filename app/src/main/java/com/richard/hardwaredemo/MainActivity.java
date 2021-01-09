@@ -61,60 +61,55 @@ public class MainActivity extends AppCompatActivity {
      * 测试打印
      */
     private PrintParams generatorPrintData() {
-        PrintParams printParams = new PrintParams(TicketSpec.SPEC_58);
+        PrintParams printParams = new PrintParams(TicketSpec.SPEC_80);
 //        printParams.add("消费小票", 1, false, Align.CENTER);
 //        printParams.addNextRow();
 //        printParams.addRow(0, String.format("单号:%s", "AD123213212321231231223434343432"));
 //        printParams.addSplitLine(0, true);
-//
-//        //第一种
-//        float[] widthWeigh = new float[]{2.4F, 1, 1, 1};
-//        printParams.addRow(0, false, widthWeigh, "名称", "数量", "单价", "小计");
-//        printParams.addRow(0, widthWeigh, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭", "1", "0.99", "0.99");
-//        printParams.addRow(0, widthWeigh, "牛排4人套餐", "1", "0.99", "0.99");
-//        printParams.addRow(0, widthWeigh, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
-//        printParams.addRow(0, widthWeigh, "牛排4人套餐", "1", "0.99", "0.99");
-//        printParams.addSplitLine(0, true);
+
+        //第一种
+        float[] widthWeigh = new float[]{2.4F, 1, 1, 1};
+        printParams.addRow(0, widthWeigh,Align.LEFT, "名称", "数量", "单价", "小计");
+        printParams.addRow(0, widthWeigh,Align.LEFT, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭", "1", "0.99", "0.99");
+        printParams.addRow(0, widthWeigh,Align.LEFT, "牛排4人套餐", "1", "0.99", "0.99");
+        printParams.addRow(0, widthWeigh,Align.LEFT, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
+        printParams.addRow(0, widthWeigh,Align.LEFT, "牛排4人套餐", "1", "0.99", "0.99");
+        printParams.addSplitLine(0, true);
 
 
         //第二种
-        int fontSize = 0;
-        printParams.add("消费小票", 1, true, Align.CENTER);
-        printParams.addNextRow();
-        printParams.addRow(fontSize, new ColumnItem(String.format("单号:%s", "AD1232132123212312312234343")));
-        printParams.addSplitLine(0, true);
-
-        printParams.addRow(
-                fontSize
-                , new ColumnItem("名称", 1.4F)
-                , new ColumnItem("数量", 1)
-                , new ColumnItem("单价", 1)
-                , new ColumnItem("合计", 1)
-        );
-
-        printParams.addRow(
-                fontSize
-                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", 1.4F, false, EllipsizeMode.LINE)
-                , new ColumnItem("10", 1)
-                , new ColumnItem("99900", 1)
-                , new ColumnItem("0.99", 1)
-        );
-
-        printParams.addRow(
-                fontSize
-                , new ColumnItem("青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE)
-                , new ColumnItem("100", 1)
-                , new ColumnItem("0.99", 1)
-                , new ColumnItem("0.999999999999999999999999999", 1,false,EllipsizeMode.LINE)
-        );
-
-        printParams.addRow(
-                fontSize
-                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE)
-                , new ColumnItem("100", 1)
-                , new ColumnItem("0.99", 1)
-                , new ColumnItem("0.99", 1)
-        );
+//        int fontSize = 0;
+//        printParams.addRow(
+//                fontSize
+//                , new ColumnItem("名称", 1.4F,Align.CENTER)
+//                , new ColumnItem("数量", 1,Align.CENTER)
+//                , new ColumnItem("单价", 1,Align.CENTER)
+//                , new ColumnItem("合计", 1,Align.CENTER)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", 1.4F, false, EllipsizeMode.ELLIPSIS,Align.CENTER)
+//                , new ColumnItem("10", 1,Align.CENTER)
+//                , new ColumnItem("99900", 1,Align.CENTER)
+//                , new ColumnItem("0.99", 1,Align.CENTER)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , new ColumnItem("青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE,Align.CENTER)
+//                , new ColumnItem("100", 1,Align.CENTER)
+//                , new ColumnItem("0.99", 1,Align.CENTER)
+//                , new ColumnItem("0.999999999999999999999999999", 1,false,EllipsizeMode.LINE,Align.CENTER)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE,Align.CENTER)
+//                , new ColumnItem("100", 1,Align.CENTER)
+//                , new ColumnItem("0.99", 1,Align.CENTER)
+//                , new ColumnItem("0.99", 1,Align.CENTER)
+//        );
 
 
         return printParams;
@@ -132,8 +127,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 try {
                     //连接打印机并打印
-//                    POSPrinter printer = PrinterManager.get().connectNetPort("172.16.2.249", 9100);
-                    POSPrinter printer = PrinterManager.get().connectUSBPort(getApplicationContext(), "/dev/bus/usb/001/004");
+                    POSPrinter printer = PrinterManager.get().connectNetPort("172.16.2.249", 9100);
+//                    POSPrinter printer = PrinterManager.get().connectUSBPort(getApplicationContext(), "/dev/bus/usb/001/004");
 
                     //重置复位打印机
                     printDataList.add(0, PrinterCmdUtil.resetPrinter());

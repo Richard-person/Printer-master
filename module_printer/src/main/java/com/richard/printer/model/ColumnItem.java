@@ -1,5 +1,6 @@
 package com.richard.printer.model;
 
+import com.richard.printer.enumerate.Align;
 import com.richard.printer.enumerate.EllipsizeMode;
 
 import java.io.Serializable;
@@ -31,8 +32,15 @@ public class ColumnItem implements Serializable {
 
     /**
      * 文本显示模式,详见EllipsizeMode
+     * @see EllipsizeMode
      */
     private EllipsizeMode ellipsizeMode = EllipsizeMode.LINE;
+
+    /**
+     * 对齐方式 详见Align
+     * @see Align
+     */
+    private Align align = Align.LEFT;
 
     public ColumnItem(String text) {
         this.text = text;
@@ -41,6 +49,12 @@ public class ColumnItem implements Serializable {
     public ColumnItem(String text, float widthWeigh) {
         this.text = text;
         this.widthWeigh = widthWeigh;
+    }
+
+    public ColumnItem(String text, float widthWeigh,Align align) {
+        this.text = text;
+        this.widthWeigh = widthWeigh;
+        this.align = align;
     }
 
     public ColumnItem(String text, float widthWeigh, boolean isBold) {
@@ -55,6 +69,15 @@ public class ColumnItem implements Serializable {
         this.isBold = isBold;
         this.ellipsizeMode = ellipsizeMode;
     }
+
+    public ColumnItem(String text, float widthWeigh, boolean isBold, EllipsizeMode ellipsizeMode, Align align) {
+        this.text = text;
+        this.widthWeigh = widthWeigh;
+        this.isBold = isBold;
+        this.ellipsizeMode = ellipsizeMode;
+        this.align = align;
+    }
+
 
     public String getText() {
         return text;
@@ -78,6 +101,14 @@ public class ColumnItem implements Serializable {
 
     public void setBold(boolean bold) {
         isBold = bold;
+    }
+
+    public Align getAlign() {
+        return align;
+    }
+
+    public void setAlign(Align align) {
+        this.align = align;
     }
 
     public EllipsizeMode getEllipsizeMode() {

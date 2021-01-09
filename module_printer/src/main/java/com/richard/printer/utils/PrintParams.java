@@ -31,7 +31,13 @@ public class PrintParams extends ArrayList<byte[]> {
     /**
      * 空白占位符
      */
-    private final String PLACE_CHAR = "\u0020";
+//    private final String PLACE_CHAR = "\u0020";
+    private final byte PLACE_CHAR = 32;
+
+    /**
+     * 分割线字符
+     */
+    private final byte SPLIT_CHAR = 45;
 
     /**
      * byte 编码格式
@@ -53,6 +59,13 @@ public class PrintParams extends ArrayList<byte[]> {
      */
     public TicketSpec getSpec() {
         return spec;
+    }
+
+    /**
+     * 添加元素
+     */
+    public boolean add(byte item) {
+        return this.add(new byte[]{item});
     }
 
     /**
@@ -127,6 +140,20 @@ public class PrintParams extends ArrayList<byte[]> {
      * @param align    内容对齐方式
      */
     public void add(byte[] item, @IntRange(from = 0, to = 1) int fontSize, boolean isBold, Align align) {
+        this.add(item, this.getLineMaxLength(fontSize), fontSize, isBold, align);
+    }
+
+    /**
+     * 添加元素
+     *
+     * @param item              item元素
+     * @param allocColumnLength 分配的列最大字节长度
+     * @param fontSize          字体倍数值（仅支持0-1）
+     * @param isBold            是否加粗
+     * @param align             内容对齐方式
+     */
+    public void add(byte[] item, int allocColumnLength, @IntRange(from = 0, to = 1) int fontSize,
+                    boolean isBold, Align align) {
         //设置字体大小
         this.add(PrinterCmdUtil.fontSizeSetBig(fontSize));
 
@@ -141,46 +168,43 @@ public class PrintParams extends ArrayList<byte[]> {
         if (align == null) {
             align = Align.LEFT;
         }
-        int lineMaxLength = this.getLineMaxLength(fontSize);
+
         int spaceCount;
         switch (align) {
             case CENTER:
-                spaceCount = (lineMaxLength - item.length) / 2;
+                spaceCount = (allocColumnLength - item.length) / 2;
                 break;
             case RIGHT:
-                spaceCount = lineMaxLength - item.length;
+                spaceCount = allocColumnLength - item.length;
                 break;
             case LEFT:
             default:
                 spaceCount = 0;
         }
+
         for (int i = 0; i < spaceCount; i++) {
             this.add(PLACE_CHAR);
         }
 
         this.add(item);
-    }
 
-    /**
-     * 添加换行
-     */
-    public void addNextRow() {
-        super.add(PrinterCmd.printLineFeed());
-    }
-
-    /**
-     * 添加分隔线
-     *
-     * @param fontSize    分割线倍数值
-     * @param isAloneLine 是否单独一行显示
-     */
-    public void addSplitLine(@IntRange(from = 0, to = 1) int fontSize, boolean isAloneLine) {
-        if (isAloneLine) {
-            this.addNextRow();
-        }
-        int length = this.getLineMaxLength(fontSize);
-        for (int index = 0; index < length; index++) {
-            this.add(new byte[]{45}, fontSize);
+        byte[] leftSpaceBytes = null;
+        switch (align) {
+            case LEFT:
+                int length = allocColumnLength - item.length;
+                if (length > 0) {
+                    leftSpaceBytes = new byte[length];
+                    Arrays.fill(leftSpaceBytes, PLACE_CHAR);
+                    this.add(leftSpaceBytes);
+                }
+                break;
+            case CENTER:
+                if (spaceCount > 0) {
+                    leftSpaceBytes = new byte[spaceCount];
+                    Arrays.fill(leftSpaceBytes, PLACE_CHAR);
+                    this.add(leftSpaceBytes);
+                }
+                break;
         }
     }
 
@@ -224,11 +248,36 @@ public class PrintParams extends ArrayList<byte[]> {
      * 添加一行
      *
      * @param fontSize   字体倍数值（仅支持0-1）
+     * @param widthWeigh 列占宽权重，widthWeigh数量和columns数量必须一致
+     * @param align      对齐方式
+     * @param columns    列文本，widthWeigh数量和columns数量必须一致
+     */
+    public void addRow(@IntRange(from = 0, to = 1) int fontSize, @NonNull float[] widthWeigh, Align align, @NonNull String... columns) {
+        this.addRow(fontSize, false, widthWeigh, align, columns);
+    }
+
+    /**
+     * 添加一行
+     *
+     * @param fontSize   字体倍数值（仅支持0-1）
      * @param isBold     是否加粗
      * @param widthWeigh 列占宽权重，widthWeigh数量和columns数量必须一致
      * @param columns    列文本，widthWeigh数量和columns数量必须一致
      */
     public void addRow(@IntRange(from = 0, to = 1) int fontSize, boolean isBold, @NonNull float[] widthWeigh, @NonNull String... columns) {
+        this.addRow(fontSize, isBold, widthWeigh, Align.LEFT, columns);
+    }
+
+    /**
+     * 添加一行
+     *
+     * @param fontSize   字体倍数值（仅支持0-1）
+     * @param isBold     是否加粗
+     * @param widthWeigh 列占宽权重，widthWeigh数量和columns数量必须一致
+     * @param align      对齐方式
+     * @param columns    列文本，widthWeigh数量和columns数量必须一致
+     */
+    public void addRow(@IntRange(from = 0, to = 1) int fontSize, boolean isBold, @NonNull float[] widthWeigh, Align align, @NonNull String... columns) {
         if (widthWeigh.length != columns.length) {
             throw new IllegalArgumentException("widthWeigh 或者 columns的元素数量必须一致");
         }
@@ -252,7 +301,7 @@ public class PrintParams extends ArrayList<byte[]> {
                     / (totalColumnWeigh * 1F) * lineMaxLength);
 
             //添加列文本内容
-            this.addColumn(columnItem, columnTextLength, allocColumnLength, lineMaxLength, fontSize, isBold);
+            this.addColumn(columnItem, columnTextLength, allocColumnLength, lineMaxLength, fontSize, isBold, align);
 
             if (columns.length > 1 && index < columns.length - 1 && columnTextLength >= allocColumnLength) {
                 this.addNextRow();
@@ -262,17 +311,10 @@ public class PrintParams extends ArrayList<byte[]> {
                 for (int lineIndex = 0; lineIndex < leftPadLength; lineIndex++) {
                     int leftPlaceholderLength = (int) Math.floor(widthWeigh[lineIndex]
                             / (totalColumnWeigh * 1F) * lineMaxLength);
-                    for (int i = 0; i < leftPlaceholderLength; i++) {
-                        this.add(PLACE_CHAR);
-                    }
-                }
-                continue;
-            }
 
-            //添加该列右边占位符
-            if (index < columns.length - 1) {
-                for (int i = 0; i < (allocColumnLength - columnTextLength); i++) {
-                    this.add(PLACE_CHAR);
+                    byte[] columnLeftSpaceBytes = new byte[leftPlaceholderLength];
+                    Arrays.fill(columnLeftSpaceBytes, PLACE_CHAR);
+                    this.add(columnLeftSpaceBytes);
                 }
             }
         }
@@ -308,7 +350,8 @@ public class PrintParams extends ArrayList<byte[]> {
                 switch (columnItem.getEllipsizeMode()) {
                     case LINE:
                         //添加列文本内容
-                        this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength, lineMaxLength, fontSize, columnItem.isBold());
+                        this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength,
+                                lineMaxLength, fontSize, columnItem.isBold(), columnItem.getAlign());
 
                         if (columns.length > 1 && index < columns.length - 1) {
                             this.addNextRow();
@@ -317,32 +360,50 @@ public class PrintParams extends ArrayList<byte[]> {
                             for (int lineIndex = 0; lineIndex < leftPadLength; lineIndex++) {
                                 int leftPlaceholderLength = (int) Math.floor(columns[lineIndex]
                                         .getWidthWeigh() / (totalColumnWeigh * 1F) * lineMaxLength);
-                                for (int i = 0; i < leftPlaceholderLength; i++) {
-                                    this.add(PLACE_CHAR);
-                                }
+
+                                byte[] columnLeftSpaceBytes = new byte[leftPlaceholderLength];
+                                Arrays.fill(columnLeftSpaceBytes, PLACE_CHAR);
+                                this.add(columnLeftSpaceBytes);
                             }
                         }
                         continue;
                     case ELLIPSIS:
                         String columnText = columnItem.getText().substring(0,
                                 (int) Math.floor(allocColumnLength / 2D) - 2).concat("...");
-                        this.add(columnText, fontSize, columnItem.isBold());
                         columnTextLength = this.getBytesLength(columnText);
+                        this.addColumn(columnText, columnTextLength, allocColumnLength, lineMaxLength,
+                                fontSize, columnItem.isBold(), columnItem.getAlign());
                         break;
                 }
             } else {
-                this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength, lineMaxLength, fontSize, columnItem.isBold());
-            }
-
-            //添加该列右边占位符
-            if (index < columns.length - 1) {
-                for (int i = 0; i < (allocColumnLength - columnTextLength); i++) {
-                    this.add(PLACE_CHAR);
-                }
+                this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength, lineMaxLength,
+                        fontSize, columnItem.isBold(), columnItem.getAlign());
             }
         }
     }
 
+
+    /**
+     * 添加换行
+     */
+    public void addNextRow() {
+        super.add(PrinterCmd.printLineFeed());
+    }
+
+    /**
+     * 添加分隔线
+     *
+     * @param fontSize    分割线倍数值
+     * @param isAloneLine 是否单独一行显示
+     */
+    public void addSplitLine(@IntRange(from = 0, to = 1) int fontSize, boolean isAloneLine) {
+        if (isAloneLine) {
+            this.addNextRow();
+        }
+        byte[] lineBytes = new byte[this.getLineMaxLength(fontSize)];
+        Arrays.fill(lineBytes, SPLIT_CHAR);
+        this.add(lineBytes, fontSize);
+    }
     //----------------------------------------------------------------------------------------------
 
     /**
@@ -354,19 +415,20 @@ public class PrintParams extends ArrayList<byte[]> {
      * @param lineMaxLength     一行最大显示字节长度
      * @param fontSize          字体放大倍数
      * @param isBold            是否加粗
+     * @param align             对齐方式
      */
-    private void addColumn(String text, int columnTextLength, int allocColumnLength, int lineMaxLength, int fontSize, boolean isBold) {
+    private void addColumn(String text, int columnTextLength, int allocColumnLength, int lineMaxLength, int fontSize, boolean isBold, Align align) {
         //添加列文本内容
         if (columnTextLength > allocColumnLength) {
             List<String> splitTextList = StringUtil.substring(text, BYTE_CHARSET, lineMaxLength);
             for (int i = 0, size = splitTextList.size(); i < size; i++) {
-                this.add(splitTextList.get(i), fontSize, isBold);
+                this.add(getByte(splitTextList.get(i)), allocColumnLength, fontSize, isBold, align);
                 if (i < size - 1) {
                     this.addNextRow();
                 }
             }
         } else {
-            this.add(text, fontSize, isBold, null);
+            this.add(getByte(text), allocColumnLength, fontSize, isBold, align);
         }
     }
 
