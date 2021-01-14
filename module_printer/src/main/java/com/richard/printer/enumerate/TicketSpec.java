@@ -8,6 +8,19 @@ package com.richard.printer.enumerate;
  */
 public enum TicketSpec {
     SPEC_80,
-//    SPEC_76,
-    SPEC_58
+    //    SPEC_76,
+    SPEC_58;
+
+    /**
+     * 解析成小票规格枚举类型
+     */
+    public static TicketSpec parse(int spec) {
+        switch (spec) {
+            case 80:
+                return TicketSpec.SPEC_80;
+            case 58:
+            default:
+                return TicketSpec.SPEC_58;
+        }
+    }
 }
