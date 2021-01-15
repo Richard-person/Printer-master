@@ -443,28 +443,71 @@ public class PrintParams extends ArrayList<byte[]> {
         int allocColumnLength;//该列分配总长度
         int columnTextLength;//列文本内容实际长度
 
-        //添加内容
+        //分解打印内容
+        int totalSize = 0;//总数据数量
+        List<String> subList = null;
         for (int index = 0; index < columns.length; index++) {
             ColumnItem columnItem = columns[index];
-            columnTextLength = this.getBytesLength(columnItem.getText());
-
-            if (index == columns.length - 1) {
-                //最后一列
-                allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
+            if (columnItem.getEllipsizeMode() == COLUMN_LINE) {
+                if (index == columns.length - 1) {
+                    //最后一列
+                    allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
+                } else {
+                    allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
+                }
+                totalAllocatedColumnLength += allocColumnLength;
+                subList = StringUtil.substring(columnItem.getText(), BYTE_CHARSET, allocColumnLength);
             } else {
-                allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
+                subList = new ArrayList<>();
+                subList.add(columnItem.getText());
             }
 
-            totalAllocatedColumnLength += allocColumnLength;
+            totalSize += subList.size();
+            columnItem.setSubstringList(subList);
+        }
 
-            //添加列文本内容
-            if (columnItem.getEllipsizeMode() != null && columnItem.getEllipsizeMode() != COLUMN_LINE
-                    && columnTextLength >= allocColumnLength) {
-                switch (columnItem.getEllipsizeMode()) {
+        //添加打印内容
+        int rowIndex = 0;
+        while (totalSize > 0) {
+            totalAllocatedColumnLength = 0;
+            for (int index = 0; index < columns.length; index++) {
+                ColumnItem item = columns[index];
+
+                //最后一列
+                if (index == columns.length - 1) {
+                    allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
+                } else {
+                    allocColumnLength = (int) Math.floor(widthWeigh[index]
+                            / (totalColumnWeigh * 1F) * lineMaxLength);
+                }
+                totalAllocatedColumnLength += allocColumnLength;
+
+                //--无内容打印的列以空字符填充
+                if (rowIndex >= item.getSubstringList().size()) {
+                    byte[] columnSpaceBytes = new byte[allocColumnLength];
+                    Arrays.fill(columnSpaceBytes, PLACE_CHAR);
+                    this.add(columnSpaceBytes);
+                    continue;
+                }
+
+                //--若该列还有内容未打印完
+                totalSize--;
+                String columnItem = item.getSubstringList().get(rowIndex);
+                columnTextLength = this.getBytesLength(columnItem);
+
+                //添加列文本内容
+                if ((item.getEllipsizeMode() != EllipsizeMode.LINE && item.getEllipsizeMode() != EllipsizeMode.ELLIPSIS)
+                        || columnTextLength < allocColumnLength) {
+                    this.addColumn(columnItem, columnTextLength, allocColumnLength, lineMaxLength,
+                            fontSize, item.isBold(), item.getAlign());
+                    continue;
+                }
+
+                switch (item.getEllipsizeMode()) {
                     case LINE:
                         //添加列文本内容
-                        this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength,
-                                lineMaxLength, fontSize, columnItem.isBold(), columnItem.getAlign());
+                        this.addColumn(columnItem, columnTextLength, allocColumnLength,
+                                lineMaxLength, fontSize, item.isBold(), item.getAlign());
 
                         if (columns.length > 1 && index < columns.length - 1) {
                             this.addNextRow();
@@ -481,20 +524,21 @@ public class PrintParams extends ArrayList<byte[]> {
                         }
                         continue;
                     case ELLIPSIS:
-                        String columnText = columnItem.getText().substring(0,
+                        String columnText = columnItem.substring(0,
                                 (int) Math.floor(allocColumnLength / 2D) - 2).concat("...");
                         columnTextLength = this.getBytesLength(columnText);
                         this.addColumn(columnText, columnTextLength, allocColumnLength, lineMaxLength,
-                                fontSize, columnItem.isBold(), columnItem.getAlign());
+                                fontSize, item.isBold(), item.getAlign());
                         break;
                 }
-            } else {
-                this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength, lineMaxLength,
-                        fontSize, columnItem.isBold(), columnItem.getAlign());
             }
+
+            if (columns.length > 1 && totalSize > 0) {
+                this.addNextRow();
+            }
+            rowIndex++;
         }
     }
-
 
     /**
      * 添加换行

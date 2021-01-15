@@ -4,6 +4,7 @@ import com.richard.printer.enumerate.Align;
 import com.richard.printer.enumerate.EllipsizeMode;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * author Richard
@@ -14,6 +15,21 @@ import java.io.Serializable;
 public class ColumnItem implements Serializable {
 
     private static final long serialVersionUID = -6867565424687687621L;
+
+    /**
+     * text根据分配列长度分页截取的列表
+     */
+    private List<String> substringList;
+
+    public List<String> getSubstringList() {
+        return substringList;
+    }
+
+    public void setSubstringList(List<String> substringList) {
+        this.substringList = substringList;
+    }
+
+    //----------------------------------------------------------------------------------------------
 
     /**
      * item名称
