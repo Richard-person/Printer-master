@@ -15,7 +15,6 @@ import java.util.List;
 
 import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
-import androidx.collection.SimpleArrayMap;
 
 import static com.richard.printer.enumerate.EllipsizeMode.COLUMN_LINE;
 
@@ -416,113 +415,6 @@ public class PrintParams extends ArrayList<byte[]> {
                 this.addNextRow();
             }
             rowIndex++;
-        }
-    }
-
-    /**
-     * 添加一行
-     *
-     * @param fontSize 字体倍数值（仅支持0-1）
-     * @param columns  列文本
-     */
-    public void addRow2(@IntRange(from = 0, to = 1) int fontSize, @NonNull float[] widthWeigh, EllipsizeMode ellipsizeMode, ColumnItem... columns) {
-        if (widthWeigh.length != columns.length) {
-            throw new IllegalArgumentException("widthWeigh 或者 columns的元素数量必须一致");
-        }
-
-        int lineMaxLength = this.getLineMaxLength(fontSize);
-        int totalAllocatedColumnLength = 0;//总共已分配的列长度
-
-        float totalColumnWeigh = 0;
-        for (float item : widthWeigh) {
-            totalColumnWeigh += item;
-        }
-
-        //换行
-        this.addNextRow();
-
-        int allocColumnLength;//该列分配总长度
-        int columnTextLength;//列文本内容实际长度
-
-        // TODO: 1/15/21  分解打印内容
-//        int totalSize = 0;//总数据数量
-//        SimpleArrayMap<ColumnItem, List<String>> columnMap = new SimpleArrayMap<>();
-////        List<List<String>> fullSplitList = new ArrayList<>();
-//        for (int index = 0; index < columns.length; index++) {
-//            ColumnItem columnItem = columns[index];
-//
-//            if (ellipsizeMode != COLUMN_LINE) {
-//                List<String> subList = new ArrayList<>();
-//                subList.add(columnItem.getText());
-//                totalSize += subList.size();
-//                fullSplitList.add(subList);
-//                continue;
-//            }
-//
-//            if (index == columns.length - 1) {
-//                //最后一列
-//                allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
-//            } else {
-//                allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
-//            }
-//
-//            totalAllocatedColumnLength += allocColumnLength;
-//
-//            List<String> subList = StringUtil.substring(columnItem, BYTE_CHARSET, allocColumnLength);
-//            totalSize += subList.size();
-//            fullSplitList.add(subList);
-//        }
-
-
-        //添加内容
-        for (int index = 0; index < columns.length; index++) {
-            ColumnItem columnItem = columns[index];
-            columnTextLength = this.getBytesLength(columnItem.getText());
-
-            if (index == columns.length - 1) {
-                //最后一列
-                allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
-            } else {
-                allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
-            }
-
-            totalAllocatedColumnLength += allocColumnLength;
-
-            //添加列文本内容
-            if (columnItem.getEllipsizeMode() != null && columnItem.getEllipsizeMode() != COLUMN_LINE
-                    && columnTextLength >= allocColumnLength) {
-                switch (columnItem.getEllipsizeMode()) {
-                    case LINE:
-                        //添加列文本内容
-                        this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength,
-                                lineMaxLength, fontSize, columnItem.isBold(), columnItem.getAlign());
-
-                        if (columns.length > 1 && index < columns.length - 1) {
-                            this.addNextRow();
-                            //占满左边空白列
-                            int leftPadLength = index + 1;
-                            for (int lineIndex = 0; lineIndex < leftPadLength; lineIndex++) {
-                                int leftPlaceholderLength = (int) Math.floor(widthWeigh[lineIndex]
-                                        / (totalColumnWeigh * 1F) * lineMaxLength);
-
-                                byte[] columnLeftSpaceBytes = new byte[leftPlaceholderLength];
-                                Arrays.fill(columnLeftSpaceBytes, PLACE_CHAR);
-                                this.add(columnLeftSpaceBytes);
-                            }
-                        }
-                        continue;
-                    case ELLIPSIS:
-                        String columnText = columnItem.getText().substring(0,
-                                (int) Math.floor(allocColumnLength / 2D) - 2).concat("...");
-                        columnTextLength = this.getBytesLength(columnText);
-                        this.addColumn(columnText, columnTextLength, allocColumnLength, lineMaxLength,
-                                fontSize, columnItem.isBold(), columnItem.getAlign());
-                        break;
-                }
-            } else {
-                this.addColumn(columnItem.getText(), columnTextLength, allocColumnLength, lineMaxLength,
-                        fontSize, columnItem.isBold(), columnItem.getAlign());
-            }
         }
     }
 

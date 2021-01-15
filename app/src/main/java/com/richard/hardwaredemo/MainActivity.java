@@ -70,54 +70,54 @@ public class MainActivity extends AppCompatActivity {
 //        printParams.addSplitLine(0, true);
 
         //第一种
-//        float[] widthWeigh = new float[]{2F, 1, 1, 1};
-//        printParams.addRow("名称", "数量", "单价", "小计");
-//        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
-//        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
-//        printParams.addRow(EllipsizeMode.COLUMN_LINE, "牛排4人套餐", "1", "0.99", "0.99");
-//        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
-//        printParams.addRow(EllipsizeMode.COLUMN_LINE, "牛排4人套餐", "1", "0.99", "0.99");
-//        printParams.addSplitLine(0, true);
+        float[] widthWeigh = new float[]{2F, 1, 1, 1};
+        printParams.addRow("名称", "数量", "单价", "小计");
+        printParams.addRow(EllipsizeMode.ELLIPSIS, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.ELLIPSIS, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.ELLIPSIS, "牛排4人套餐", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.ELLIPSIS, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
+        printParams.addRow(EllipsizeMode.ELLIPSIS, "牛排4人套餐", "1", "0.99", "0.99");
+        printParams.addSplitLine(0, true);
 
 
         //第二种
-        int fontSize = 0;
-        float[] widthWeigh = new float[]{2F, 1, 1, 1};
-        printParams.addRow(
-                fontSize
-                , widthWeigh
-                , new ColumnItem("名称", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("数量", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("单价", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("合计", false, EllipsizeMode.LINE, Align.RIGHT)
-        );
-
-        printParams.addRow(
-                fontSize
-                , widthWeigh
-                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("10", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("9990099900999009990099900", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.RIGHT)
-        );
-
-        printParams.addRow(
-                fontSize
-                , widthWeigh
-                , new ColumnItem("青椒土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("100", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("0.999999999999999999999999999", false, EllipsizeMode.LINE, Align.RIGHT)
-        );
-
-        printParams.addRow(
-                fontSize
-                , widthWeigh
-                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("100", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.LEFT)
-                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.RIGHT)
-        );
+//        int fontSize = 0;
+//        float[] widthWeigh = new float[]{2F, 1, 1, 1};
+//        printParams.addRow(
+//                fontSize
+//                , widthWeigh
+//                , new ColumnItem("名称", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("数量", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("单价", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("合计", false, EllipsizeMode.LINE, Align.RIGHT)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , widthWeigh
+//                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("10", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("9990099900999009990099900", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.RIGHT)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , widthWeigh
+//                , new ColumnItem("青椒土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("100", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("0.999999999999999999999999999", false, EllipsizeMode.LINE, Align.RIGHT)
+//        );
+//
+//        printParams.addRow(
+//                fontSize
+//                , widthWeigh
+//                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("100", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.LEFT)
+//                , new ColumnItem("0.99", false, EllipsizeMode.LINE, Align.RIGHT)
+//        );
 
 
         return printParams;
