@@ -283,6 +283,8 @@ public class PrintParams extends ArrayList<byte[]> {
         }
 
         int lineMaxLength = this.getLineMaxLength(fontSize);
+        int totalAllocatedColumnLength = 0;//总共已分配的列长度
+
         float totalColumnWeigh = 0;
         for (float item : widthWeigh) {
             totalColumnWeigh += item;
@@ -291,14 +293,23 @@ public class PrintParams extends ArrayList<byte[]> {
         //换行
         this.addNextRow();
 
+        int allocColumnLength;//该列分配总长度
+        int columnTextLength;//列文本内容实际长度
+
         //添加内容
         for (int index = 0; index < columns.length; index++) {
             String columnItem = columns[index];
-            int columnTextLength = this.getBytesLength(columnItem);
+            columnTextLength = this.getBytesLength(columnItem);
 
-            //该列分配总长度
-            int allocColumnLength = (int) Math.floor(widthWeigh[index]
-                    / (totalColumnWeigh * 1F) * lineMaxLength);
+            if (index == columns.length - 1) {
+                //最后一列
+                allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
+            } else {
+                allocColumnLength = (int) Math.floor(widthWeigh[index]
+                        / (totalColumnWeigh * 1F) * lineMaxLength);
+            }
+
+            totalAllocatedColumnLength += allocColumnLength;
 
             //添加列文本内容
             this.addColumn(columnItem, columnTextLength, allocColumnLength, lineMaxLength, fontSize, isBold, align);
@@ -328,6 +339,8 @@ public class PrintParams extends ArrayList<byte[]> {
      */
     public void addRow(@IntRange(from = 0, to = 1) int fontSize, ColumnItem... columns) {
         int lineMaxLength = this.getLineMaxLength(fontSize);
+        int totalAllocatedColumnLength = 0;//总共已分配的列长度
+
         float totalColumnWeigh = 0;
         for (ColumnItem item : columns) {
             totalColumnWeigh += item.getWidthWeigh();
@@ -336,14 +349,23 @@ public class PrintParams extends ArrayList<byte[]> {
         //换行
         this.addNextRow();
 
+        int allocColumnLength;//该列分配总长度
+        int columnTextLength;//列文本内容实际长度
+
         //添加内容
         for (int index = 0; index < columns.length; index++) {
             ColumnItem columnItem = columns[index];
-            int columnTextLength = this.getBytesLength(columnItem.getText());
+            columnTextLength = this.getBytesLength(columnItem.getText());
 
-            //该列分配总长度
-            int allocColumnLength = (int) Math.floor(columnItem.getWidthWeigh()
-                    / (totalColumnWeigh * 1F) * lineMaxLength);
+            if (index == columns.length - 1) {
+                //最后一列
+                allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
+            } else {
+                allocColumnLength = (int) Math.floor(columnItem.getWidthWeigh()
+                        / (totalColumnWeigh * 1F) * lineMaxLength);
+            }
+
+            totalAllocatedColumnLength += allocColumnLength;
 
             //添加列文本内容
             if (columnItem.getEllipsizeMode() != NONE && columnTextLength >= allocColumnLength) {
