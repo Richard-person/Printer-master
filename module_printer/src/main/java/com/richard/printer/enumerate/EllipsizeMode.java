@@ -9,18 +9,18 @@ package com.richard.printer.enumerate;
 public enum EllipsizeMode {
 
     /**
-     * 无，完整显示（但是格式会参差不齐）
-     */
-    NONE,
-
-    /**
      * 文本一行若显示不完，则结尾处以省略号代替
      */
     ELLIPSIS,
 
     /**
-     * 文本显示不完时，则另起一行单独显示
+     * 文本显示不完时，则单独行跨列显示
      */
-    LINE;
+    LINE,
+
+    /**
+     * 当某一列显示不完时，则在该列多行显示
+     */
+    COLUMN_LINE;
 
 }

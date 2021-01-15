@@ -5,10 +5,8 @@ import android.view.View;
 
 import com.richard.printer.command.PrinterCmd;
 import com.richard.printer.command.PrinterCmdUtil;
-import com.richard.printer.enumerate.Align;
 import com.richard.printer.enumerate.EllipsizeMode;
 import com.richard.printer.enumerate.TicketSpec;
-import com.richard.printer.model.ColumnItem;
 import com.richard.printer.utils.POSPrinter;
 import com.richard.printer.utils.PrintParams;
 import com.richard.printer.utils.PrinterManager;
@@ -32,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         btn_test_print.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                generatorPrintData();
                 startPrint(generatorPrintData());
 
 //                UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -63,17 +62,19 @@ public class MainActivity extends AppCompatActivity {
     private PrintParams generatorPrintData() {
         PrintParams printParams = new PrintParams(TicketSpec.SPEC_80);
 //        printParams.add("消费小票", 1, false, Align.CENTER);
+
 //        printParams.addNextRow();
 //        printParams.addRow(0, String.format("单号:%s", "AD123213212321231231223434343432"));
 //        printParams.addSplitLine(0, true);
 
         //第一种
-        float[] widthWeigh = new float[]{2.4F, 1, 1, 1};
-        printParams.addRow(0, widthWeigh,Align.LEFT, "名称", "数量", "单价", "小计");
-        printParams.addRow(0, widthWeigh,Align.LEFT, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭", "1", "0.99", "0.99");
-        printParams.addRow(0, widthWeigh,Align.LEFT, "牛排4人套餐", "1", "0.99", "0.99");
-        printParams.addRow(0, widthWeigh,Align.LEFT, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
-        printParams.addRow(0, widthWeigh,Align.LEFT, "牛排4人套餐", "1", "0.99", "0.99");
+        float[] widthWeigh = new float[]{2F, 1, 1, 1};
+        printParams.addRow("名称", "数量", "单价", "小计");
+        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒肉丝炒饭青椒", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.COLUMN_LINE, "牛排4人套餐", "1", "0.99", "0.99");
+        printParams.addRow(EllipsizeMode.COLUMN_LINE, "青椒肉丝炒饭", "1", "0.99", "0.999999999999999999999999999");
+        printParams.addRow(EllipsizeMode.COLUMN_LINE, "牛排4人套餐", "1", "0.99", "0.99");
         printParams.addSplitLine(0, true);
 
 
@@ -81,34 +82,34 @@ public class MainActivity extends AppCompatActivity {
 //        int fontSize = 0;
 //        printParams.addRow(
 //                fontSize
-//                , new ColumnItem("名称", 1.4F,Align.CENTER)
-//                , new ColumnItem("数量", 1,Align.CENTER)
-//                , new ColumnItem("单价", 1,Align.CENTER)
-//                , new ColumnItem("合计", 1,Align.CENTER)
+//                , new ColumnItem("名称", 1.4F,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("数量", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("单价", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("合计", 1,false,EllipsizeMode.LINE,Align.RIGHT)
 //        );
 //
 //        printParams.addRow(
 //                fontSize
-//                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", 1.4F, false, EllipsizeMode.ELLIPSIS,Align.CENTER)
-//                , new ColumnItem("10", 1,Align.CENTER)
-//                , new ColumnItem("99900", 1,Align.CENTER)
-//                , new ColumnItem("0.99", 1,Align.CENTER)
+//                , new ColumnItem("土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝土豆肉丝", 1.4F, false, EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("10", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("99900", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("0.99", 1,false,EllipsizeMode.LINE,Align.RIGHT)
 //        );
 //
 //        printParams.addRow(
 //                fontSize
-//                , new ColumnItem("青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE,Align.CENTER)
-//                , new ColumnItem("100", 1,Align.CENTER)
-//                , new ColumnItem("0.99", 1,Align.CENTER)
-//                , new ColumnItem("0.999999999999999999999999999", 1,false,EllipsizeMode.LINE,Align.CENTER)
+//                , new ColumnItem("青椒土豆肉丝", 1.4F, false, EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("100", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("0.99", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("0.999999999999999999999999999", 1,false,EllipsizeMode.LINE,Align.RIGHT)
 //        );
 //
 //        printParams.addRow(
 //                fontSize
-//                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE,Align.CENTER)
-//                , new ColumnItem("100", 1,Align.CENTER)
-//                , new ColumnItem("0.99", 1,Align.CENTER)
-//                , new ColumnItem("0.99", 1,Align.CENTER)
+//                , new ColumnItem("青椒土豆肉丝青椒土豆肉丝", 1.4F, false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("100", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("0.99", 1,false,EllipsizeMode.LINE,Align.LEFT)
+//                , new ColumnItem("0.99", 1,false,EllipsizeMode.LINE,Align.RIGHT)
 //        );
 
 
@@ -140,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
                     printDataList.add(PrinterCmdUtil.printLineFeed());
 
                     //送纸150像素
-                    printDataList.add(PrinterCmd.printFeedPaper(150));
+                    printDataList.add(PrinterCmd.printFeedPaper(700));
 
                     //进纸切割
                     printDataList.add(PrinterCmdUtil.feedPaperCutPartial());
