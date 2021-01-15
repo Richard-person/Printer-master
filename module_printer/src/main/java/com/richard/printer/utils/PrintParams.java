@@ -368,7 +368,8 @@ public class PrintParams extends ArrayList<byte[]> {
             totalAllocatedColumnLength += allocColumnLength;
 
             //添加列文本内容
-            if (columnItem.getEllipsizeMode() != NONE && columnTextLength >= allocColumnLength) {
+            if (columnItem.getEllipsizeMode() != null && columnItem.getEllipsizeMode() != NONE
+                    && columnTextLength >= allocColumnLength) {
                 switch (columnItem.getEllipsizeMode()) {
                     case LINE:
                         //添加列文本内容
