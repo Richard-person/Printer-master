@@ -267,6 +267,24 @@ public class PrintParams extends ArrayList<byte[]> {
     /**
      * 添加一行
      *
+     * @param fontSize   字体倍数值（仅支持0-1）
+     * @param widthWeigh 列占宽权重，widthWeigh数量和columns数量必须一致
+     * @param columns    列文本
+     */
+    public void addRow(@IntRange(from = 0, to = 1) int fontSize, @NonNull float[] widthWeigh, String... columns) {
+        this.addRow(
+                fontSize
+                , false
+                , widthWeigh
+                , Align.LEFT
+                , EllipsizeMode.LINE
+                , columns
+        );
+    }
+
+    /**
+     * 添加一行
+     *
      * @param fontSize 字体倍数值（仅支持0-1）
      * @param isBold   是否加粗
      * @param columns  列文本
