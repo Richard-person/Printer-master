@@ -338,8 +338,7 @@ public class PrintParams extends ArrayList<byte[]> {
                 //最后一列
                 allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
             } else {
-                allocColumnLength = (int) Math.floor(widthWeigh[index]
-                        / (totalColumnWeigh * 1F) * lineMaxLength);
+                allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
             }
 
             totalAllocatedColumnLength += allocColumnLength;
@@ -429,13 +428,17 @@ public class PrintParams extends ArrayList<byte[]> {
      * @param fontSize 字体倍数值（仅支持0-1）
      * @param columns  列文本
      */
-    public void addRow(@IntRange(from = 0, to = 1) int fontSize, ColumnItem... columns) {
+    public void addRow(@IntRange(from = 0, to = 1) int fontSize, @NonNull float[] widthWeigh, ColumnItem... columns) {
+        if (widthWeigh.length != columns.length) {
+            throw new IllegalArgumentException("widthWeigh 或者 columns的元素数量必须一致");
+        }
+
         int lineMaxLength = this.getLineMaxLength(fontSize);
         int totalAllocatedColumnLength = 0;//总共已分配的列长度
 
         float totalColumnWeigh = 0;
-        for (ColumnItem item : columns) {
-            totalColumnWeigh += item.getWidthWeigh();
+        for (float item : widthWeigh) {
+            totalColumnWeigh += item;
         }
 
         //换行
@@ -453,8 +456,7 @@ public class PrintParams extends ArrayList<byte[]> {
                 //最后一列
                 allocColumnLength = lineMaxLength - totalAllocatedColumnLength;
             } else {
-                allocColumnLength = (int) Math.floor(columnItem.getWidthWeigh()
-                        / (totalColumnWeigh * 1F) * lineMaxLength);
+                allocColumnLength = (int) Math.floor(widthWeigh[index] / (totalColumnWeigh * 1F) * lineMaxLength);
             }
 
             totalAllocatedColumnLength += allocColumnLength;
@@ -473,8 +475,8 @@ public class PrintParams extends ArrayList<byte[]> {
                             //占满左边空白列
                             int leftPadLength = index + 1;
                             for (int lineIndex = 0; lineIndex < leftPadLength; lineIndex++) {
-                                int leftPlaceholderLength = (int) Math.floor(columns[lineIndex]
-                                        .getWidthWeigh() / (totalColumnWeigh * 1F) * lineMaxLength);
+                                int leftPlaceholderLength = (int) Math.floor(widthWeigh[lineIndex]
+                                        / (totalColumnWeigh * 1F) * lineMaxLength);
 
                                 byte[] columnLeftSpaceBytes = new byte[leftPlaceholderLength];
                                 Arrays.fill(columnLeftSpaceBytes, PLACE_CHAR);
