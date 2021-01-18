@@ -597,6 +597,7 @@ public class PrintParams extends ArrayList<byte[]> {
         Arrays.fill(lineBytes, SPLIT_CHAR);
         this.add(lineBytes, fontSize);
     }
+
     //----------------------------------------------------------------------------------------------
 
     /**
@@ -623,30 +624,6 @@ public class PrintParams extends ArrayList<byte[]> {
         } else {
             this.add(getByte(text), allocColumnLength, fontSize, isBold, align);
         }
-    }
-
-    /**
-     * 获取text的byte数组
-     */
-    private static byte[] getByte(String text) {
-        if (text == null) {
-            return null;
-        }
-        try {
-            return text.getBytes(BYTE_CHARSET);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * 获取数据长度
-     *
-     * @param text 文本
-     */
-    private int getBytesLength(String text) {
-        return text.getBytes(Charset.forName(BYTE_CHARSET)).length;
     }
 
     /**
@@ -683,5 +660,30 @@ public class PrintParams extends ArrayList<byte[]> {
         }
 
         return maxLineLength;
+    }
+
+    //----------------------静态方法----------------------
+    /**
+     * 获取text的byte数组
+     */
+    public static byte[] getByte(String text) {
+        if (text == null) {
+            return null;
+        }
+        try {
+            return text.getBytes(BYTE_CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 获取数据长度
+     *
+     * @param text 文本
+     */
+    public static int getBytesLength(String text) {
+        return text.getBytes(Charset.forName(BYTE_CHARSET)).length;
     }
 }
